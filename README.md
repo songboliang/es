@@ -237,6 +237,8 @@ public class Demo {
 
 2.5 操作文档
 
+新增文档
+
     @Test
     public void addData() throws IOException {
 
@@ -254,14 +256,74 @@ public class Demo {
         System.out.println(index.getResult().toString());
     }
 
+修改文档
+
+    public void updateDoc() throws IOException {
+        // 1.创建一个Map,指定需要修改的内容
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("name","李四");
+        String docId = "1";
+        // 2.创建request对象，封装数据
+        UpdateRequest request = new UpdateRequest(index,docId);
+        request.doc(map);
+        // 3.通过client对象执行
+        UpdateResponse update = client.update(request, RequestOptions.DEFAULT);
+        // 4.输出返回结果
+        System.out.println(update);
+    }
+
+删除文档
+
+    public void deleteDoc()throws IOException{
+        DeleteRequest request = new DeleteRequest(index,"1");
+
+        DeleteResponse delete = client.delete(request, RequestOptions.DEFAULT);
+
+        System.out.println(delete);
+    }
+    
+# 2.6 批量操做
+
+批量新增
+
+    public void bulkDoc()throws IOException{
+
+        Person person1 = new Person(14,"小红",6,new Date());
+        Person person2 = new Person(15,"小芳",7,new Date());
+        Person person3 = new Person(16,"小明",8,new Date());
+        Person person4 = new Person(17,"小松",7,new Date());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+
+        IndexRequest source = new IndexRequest(index,"_doc", person1.getId().toString()).source(objectMapper.writeValueAsString(person1), XContentType.JSON);
+        IndexRequest source1 = new IndexRequest(index, "_doc",person2.getId().toString()).source(objectMapper.writeValueAsString(person2), XContentType.JSON);
+        IndexRequest source2 = new IndexRequest(index, "_doc",person3.getId().toString()).source(objectMapper.writeValueAsString(person3), XContentType.JSON);
+        IndexRequest source3 = new IndexRequest(index, "_doc",person4.getId().toString()).source(objectMapper.writeValueAsString(person4), XContentType.JSON);
+        BulkRequest request = new BulkRequest();
+        request.add(source);
+        request.add(source1);
+        request.add(source2);
+        request.add(source3);
+
+        BulkResponse bulk = client.bulk(request, RequestOptions.DEFAULT);
+
+        System.out.println(bulk);
+    }
 
 
 
 
+批量删除
 
-
-
-
+    public void bulkDelete()throws IOException{
+        BulkRequest request = new BulkRequest();
+        request.add(new DeleteRequest(index,"1"));
+        request.add(new DeleteRequest(index,"10"));
+        request.add(new DeleteRequest(index,"11"));
+        BulkResponse bulk = client.bulk(request, RequestOptions.DEFAULT);
+        System.out.println(bulk);
+    }
 
 
 
